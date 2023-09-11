@@ -82,8 +82,8 @@ def write_tweets_to_csv(tweet_ids, output_file="output/tweets_output.csv", write
                 tweet_dict, quote_dict = get_tweet_info(tweet)
             except Exception as e:
                 print ("Exception getting tweet ID " + str(tweet_id))
-                print (e.message)
-                time.sleep(60)
+                print (e)
+                time.sleep(5)
                 continue
             time.sleep(1)
             writer.writerow(tweet_dict)

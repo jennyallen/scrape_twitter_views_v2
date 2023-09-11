@@ -77,18 +77,22 @@ def write_tweets_to_csv(tweet_ids, output_file="output/tweets_output.csv", write
         for tweet_id in tweet_ids:
             try:
                 tweet = get_tweet(tweet_id)
-
                 print(tweet)
                 tweet_dict, quote_dict = get_tweet_info(tweet)
             except Exception as e:
                 print ("Exception getting tweet ID " + str(tweet_id))
                 print (e)
                 time.sleep(5)
+                tweet_dict = {k : None for k in keys}
+                tweet_dict["id_str"] = tweet_id
+                writer.writerow(tweet_dict)
                 continue
-            time.sleep(1)
+            if not tweet_dict.get("id_str"):
+                tweet_dict["id_str"] = tweet_id
             writer.writerow(tweet_dict)
             if quote_dict:
                 writer.writerow(quote_dict)
+            time.sleep(1)
 
     print(f"Data has been written to {output_file}")
 

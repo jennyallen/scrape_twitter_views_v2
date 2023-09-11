@@ -68,14 +68,16 @@ def get_tweet_info(tweet_orig, stop_recurse = False):
 
 
     
-def write_tweets_to_csv(tweet_ids, output_file="output/tweets_output.csv"):
-    with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+def write_tweets_to_csv(tweet_ids, output_file="output/tweets_output.csv", write_header = True):
+    with open(output_file, 'a+', newline='', encoding='utf-8') as csvfile:
         fieldnames = keys + ["is_quote_tweet", "is_quoted_tweet", "quoted_by_id"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
+        if write_header:
+            writer.writeheader()
         for tweet_id in tweet_ids:
             try:
                 tweet = get_tweet(tweet_id)
+
                 print(tweet)
                 tweet_dict, quote_dict = get_tweet_info(tweet)
             except Exception as e:
@@ -95,6 +97,7 @@ def main():
     parser.add_option("-t", "--tweets", dest="tweet_ids", help="list of tweet IDs separated by comma", metavar="TWEETS")
     parser.add_option("-f", "--file", dest="file_path", help="path to a text file with tweet IDs, each separated by a newline", metavar="FILE")
     parser.add_option("-o", "--output", dest="output_file", help="output_file", metavar="FILE")
+    parser.add_option("-i", "--input", dest="input_file", help="past tweets", metavar="FILE")
 
     (options, args) = parser.parse_args()
 
@@ -107,11 +110,22 @@ def main():
     else:
         tweet_ids = options.tweet_ids.split(',')
 
+    # past tweets
+    if options.input_file:
+        with open(options.input_file, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)
+            past_tweet_ids = [row[0] for row in reader]
+    else:
+       past_tweet_ids = []
+
+    tweet_ids = [tweet_id for tweet_id in tweet_ids if tweet_id not in past_tweet_ids]
+
     if options.output_file:
         output_file = options.output_file
     else:
         output_file = "output/tweets_output.csv"
-    write_tweets_to_csv(tweet_ids, output_file)
+    write_tweets_to_csv(tweet_ids, output_file, len(past_tweet_ids) == 0)
 
 if __name__ == "__main__":
     main()
